@@ -3,6 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 
 class Card:
+    def display(self):
+        out = "作者:"+self.author+'\n'+"时间:"+self.date+'\n'+"标题:"+self.title.text+'\n'+"链接:"+self.url+'\n'
+        return out
     def __init__(self):
         self.sequence = ''
         self.state = ''
@@ -129,6 +132,7 @@ if __name__ == '__main__':
     cards = bbs.get_forum_content('就业特快')
     print('len cards: ', len(cards))
     print('the last card: ', cards[-1])
+    print(cards[-2])
     print('start to test user cards: wang 360')
     cards = bbs.get_user_content('wang360')
     print("len cards: ", len(cards))

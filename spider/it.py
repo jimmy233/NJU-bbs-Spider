@@ -11,6 +11,8 @@ import requests
 import bbsSpider
 import time  
 import threading 
+import urllib3
+import json
 from itchat.content import *
 
 KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
@@ -48,12 +50,60 @@ def simple_reply(msg):
 def t1():
     itchat.run()
 def t2():
-    author = itchat.search_friends(nickName='明月无晴')[0]
-    bbs = bbsSpider.BBSSpider()
-    #tableContent = bbs.get_forum_content('就业特快')
-    cards = bbs.get_forum_content('就业特快')
-    author.send("memeda")
-    print(author)
+    #author = itchat.search_friends(nickName='明月无晴')[0]
+    url='http://172.26.57.176:8080/getdict'
+    http_init = urllib3.PoolManager()
+    response_init = http_init.request('get',url)
+    hjson_init = json.loads(response_init.data)
+    Max_sequence = {}
+    for key in hjson_init['forum']:
+        Max_sequence[key]=-1
+    sequence_len=len(Max_sequence)
+    while True:
+        bbs = bbsSpider.BBSSpider()
+        http = urllib3.PoolManager()
+        response = http.request('get',url)
+        hjson = json.loads(response.data) 
+        forum_length=len(hjson['forum'])
+        if forum_length > sequence_len:
+            for t in range(sequence_len,forum_length):
+                Max_sequence[hjson['forum'][t]]=-1
+            sequence_len=forum_length
+        for key in hjson['forum']:
+            forum_name=key
+            #print("233"+key)
+            cards = bbs.get_forum_content(forum_name)
+            cards_length = len(cards)
+            last_sequence = int(cards[-1].sequence)
+            if last_sequence > Max_sequence[key]:
+                if Max_sequence[key] == -1:
+                    for user in hjson['forum'][key]:
+                        author = itchat.search_friends(nickName=user)[0]
+                        if cards_length > 5:
+                            for i in range(1,6):
+                                print(cards[-i])
+                                st=cards[-i].display()
+                                author.send(st)
+                        elif cards_length>0 and cards_length<=5:
+                            for j in range(1,cards_length):
+                                st=cards[-i].display()
+                                author.send(st)
+                        elif cards_length == 0 :
+                                author.send("Sorry, 您关注的板块无信息")                    
+                else:
+                    num= last_sequence - Max_sequence[key]
+                    #print("2333:"+num)
+                    for user in hjson['forum'][key]:
+                        author = itchat.search_friends(nickName=user)[0]
+                        for i in range(1,num+1):
+                            print(cards[-i])
+                            st=cards[-i].display()
+                            author.send("新的消息:"+'\n'+st)
+            Max_sequence[key] = last_sequence
+        time.sleep(15)
+            
+                        
+                        
 itchat.auto_login()
 threads = []
 th1 = threading.Thread(target=t1, args=())
