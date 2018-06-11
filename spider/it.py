@@ -50,8 +50,8 @@ def t1():
 def t2():
     author = itchat.search_friends(nickName='明月无晴')[0]
     bbs = bbsSpider.BBSSpider()
-    tableContent = bbs.getJobExpress()
-    cards = bbs.getCards(tableContent)
+    #tableContent = bbs.get_forum_content('就业特快')
+    cards = bbs.get_forum_content('就业特快')
     author.send("memeda")
     print(author)
 itchat.auto_login()
