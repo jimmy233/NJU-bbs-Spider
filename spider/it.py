@@ -9,7 +9,10 @@ Created on Fri May 25 14:26:53 2018
 import itchat
 import requests
 import bbsSpider
+import time  
+import threading 
 from itchat.content import *
+
 KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
 
 def get_response(msg):
@@ -42,6 +45,23 @@ def simple_reply(msg):
        itchat.send_msg(tuling_reply(msg),toUserName=msg['FromUserName'])
     #itchat.send_msg('已经收到了文本消息，消息内容为%s'%msg['Text'],toUserName=msg['FromUserName'])
     #return "不想理你，并觉得你很傻逼"#"T reveived: %s" % msg["Text"]     #返回的给对方的消息，msg["Text"]表示消息的内容
-
+def t1():
+    itchat.run()
+def t2():
+    author = itchat.search_friends(nickName='明月无晴')[0]
+    bbs = bbsSpider.BBSSpider()
+    tableContent = bbs.getJobExpress()
+    cards = bbs.getCards(tableContent)
+    author.send("memeda")
+    print(author)
 itchat.auto_login()
-itchat.run()
+threads = []
+th1 = threading.Thread(target=t1, args=())
+th1.start()
+threads.append(th1)
+th2 = threading.Thread(target=t2, args=())
+th2.start()
+threads.append(th2)
+for th in threads:  
+    th.join()
+
