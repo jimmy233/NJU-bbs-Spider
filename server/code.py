@@ -16,7 +16,7 @@ All['user']=dict()
 All['forum']=dict()
 class test:
 	def GET(self):
-		i = web.input(id=[])
+		i = web.input(id="")
 		web.setcookie('name', i.id, 3600)
 		return render.test()
 class Set:
@@ -27,7 +27,7 @@ class Set:
 			raise web.seeother('/test')
 			return
 		if i.key not in All[i.choice]:
-			All[i.choice][i.key]=[]
+			All[i.choice][i.key]=list()
 		All[i.choice][i.key].append(name)
 		raise web.seeother('/end')
 class Get:

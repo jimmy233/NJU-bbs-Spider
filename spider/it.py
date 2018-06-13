@@ -13,6 +13,8 @@ import time
 import threading 
 import urllib3
 import json
+import base64
+import requests
 from itchat.content import *
 
 KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
@@ -38,11 +40,11 @@ def tuling_reply(msg):
 def simple_reply(msg):
     #这个是向发送者发送消息
     msg_from = itchat.search_friends(userName=msg['FromUserName'])['NickName']
-    nick=msg_from
+    nick=base64.b64encode(bytes(msg_from,encoding='utf-8'))
     print(msg['Text'])
     st=msg['Text']
     if st=='我要关注':
-       itchat.send_msg('http://127.0.0.1:8080/test?id=%s'%nick,toUserName=msg['FromUserName'])
+       itchat.send_msg('http://118.25.190.133:8080/test?id=%s'%str(nick,encoding='utf-8'),toUserName=msg['FromUserName'])
     else:
        itchat.send_msg(tuling_reply(msg),toUserName=msg['FromUserName'])
     #itchat.send_msg('已经收到了文本消息，消息内容为%s'%msg['Text'],toUserName=msg['FromUserName'])
@@ -51,10 +53,11 @@ def t1():
     itchat.run()
 def t2():
     #author = itchat.search_friends(nickName='明月无晴')[0]
-    url='http://172.26.57.176:8080/getdict'
-    http_init = urllib3.PoolManager()
-    response_init = http_init.request('get',url)
-    hjson_init = json.loads(response_init.data)
+    url='http://118.25.190.133:8080/getdict'
+    #http_init = urllib3.PoolManager()
+    response_init = requests.get(url)
+    print(response_init.text)
+    hjson_init = json.loads(response_init.text)
     Max_sequence = {}
     for key in hjson_init['forum']:
         Max_sequence[key]=-1
@@ -62,8 +65,9 @@ def t2():
     while True:
         bbs = bbsSpider.BBSSpider()
         http = urllib3.PoolManager()
-        response = http.request('get',url)
-        hjson = json.loads(response.data) 
+        response = requests.get(url)
+        hjson = json.loads(response.text) 
+        print(hjson)
         forum_length=len(hjson['forum'])
         if forum_length > sequence_len:
             for t in range(sequence_len,forum_length):
@@ -78,6 +82,7 @@ def t2():
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
                     for user in hjson['forum'][key]:
+                        user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
                         author = itchat.search_friends(nickName=user)[0]
                         if cards_length > 5:
                             for i in range(1,6):
@@ -104,7 +109,7 @@ def t2():
             
                         
                         
-itchat.auto_login()
+itchat.auto_login(hotReload=True, enableCmdQR=2)
 threads = []
 th1 = threading.Thread(target=t1, args=())
 th1.start()

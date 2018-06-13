@@ -5,10 +5,11 @@ a, a.link{color:#666;text-decoration:none;font-weight:500;}
 a, a.link:hover{color:#666;}
 h1,h2,h3,h4,h5,h6{font-weight: normal;}
 
-.login{width:100%;height:100%;position:fixed;z-index:-10; background: url(static/images/login-bg.png);background-size: 100% 100%;background-repeat: none;}
+.login{width:100%;height:100%;position:fixed;z-index:-10; background: url(../images/login-bg.png);background-size: 100% 100%;background-repeat: none;}
 .welcome{width:100%;margin:25% 0;}
 .welcome img{width:100%;}
-.login-inp{margin:0 30px 15px 30px;border:1px solid #fff;border-radius:25px;}
-.login-inp label{width:4em;text-align:center;display:inline-block;color:#fff;}
-.login-inp input{line-height:100px;color:#fff;background-color:transparent;border:none;outline: none;}
-.login-inp input{display:block;width:100%;text-align:center;line-height:100px;color:#fff;font-size:50px;letter-spacing:5px;}
+.login-inp{margin:0 30px 15px 30px;border:1px solid #fff;border-radius:25px;font-size:50px;text-align:center;}
+.login-inp label{text-align:center;color:#fff;line-height:100px;width:100%; vertical-align:middle;}
+.login-inp select{text-align:center;line-height:100px;border:none;outline: none;margin:0px;width:auto;}
+.login-inp input{display:inline;color:#fff;border:none;outline: none;width:100%;background-color:transparent;text-align:center;}
+.login-inp input{line-height:100px;color:#fff;letter-spacing:5px;font-size:50px;}

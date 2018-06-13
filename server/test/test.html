@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="user-scalable=yes, width=device-width, initial-scale=0.5, maximum-scale=2.0">
-
+<link rel="shortcut icon" href="static/images/favicon.ico">
 <link rel="stylesheet" href="static/css/login.css" />
 <style>
 .select{
@@ -26,12 +26,13 @@ line-height:100px;
 <div class="login">
 	<div class="welcome"><img src="static/images/welcome.png"></div>
 	<div class="login-form">
-		<div class="login-inp">
-			<label display="inline">关键词</label>
-			<input type="text" name="key" style="font-size:50px;">
+		<div class="login-inp" >
+			<label>关键词</label>
+			<input type="text" name="key"> 			
 		</div>
 	</div>
-	<div class="login-inp"><label>关注类型</label><span>                    </span>
+	<div class="login-inp">
+		<label> 关注类型 </label> <br>
 		<select type="text" class="select" name="choice">
 			<option class="option" value="forum">版块</option>
 			<option class="option" value="user">用户</option>
@@ -39,7 +40,7 @@ line-height:100px;
 		</select>
 	</div>
 	<div class="login-inp">
-		<input type=submit style="font-size:50px;" value="立即关注">
+		<input type=submit value="立即关注">
 	</div>
 
 </div>
