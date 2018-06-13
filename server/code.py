@@ -10,10 +10,11 @@ urls = (
 	'/end','End'
 )
 render = web.template.render('test')
-All = dict()
-All['topic']=dict()
-All['user']=dict()
-All['forum']=dict()
+All = {}
+All.setdefault('topic',dict())
+All.setdefault('user',dict())
+All.setdefault('forum',dict())
+
 class test:
 	def GET(self):
 		i = web.input(id="")
@@ -23,12 +24,12 @@ class Set:
 	def POST(self):
 		i = web.input()
 		name = web.cookies().get('name')
-		if name == []:
+		if name == "":
 			raise web.seeother('/test')
 			return
-		if i.key not in All[i.choice]:
-			All[i.choice][i.key]=list()
-		All[i.choice][i.key].append(name)
+		print(name)
+		All[i.choice].setdefault(i.key,list()).append(name)
+		print(All)
 		raise web.seeother('/end')
 class Get:
 	def GET(self):

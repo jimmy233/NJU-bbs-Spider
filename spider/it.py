@@ -14,6 +14,7 @@ import threading
 #import urllib3
 import json
 import base64
+import pickle
 #import requests
 from itchat.content import *
 
@@ -60,6 +61,8 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
             #print("233"+key)
             cards = bbs.get_forum_content(forum_name)
             cards_length = len(cards)
+            if cards_length == 0:
+                continue
             last_sequence = int(cards[-1].sequence)
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
@@ -67,14 +70,19 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
                         user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
                         print("2333"+user)
                         print(itchat.search_friends(nickName=user))
-                        author = itchat.search_friends(nickName=user)[0]
+                        try:
+                            author = itchat.search_friends(nickName=user)[0]
+                        except:
+                            print('Error when finding author in forum()')
+                            continue
                         if cards_length > 5:
                             for i in range(1,6):
                                 print(cards[-i])
                                 st=cards[-i].display()
                                 author.send(st)
                         elif cards_length>0 and cards_length<=5:
-                            for j in range(1,cards_length):
+                            for j in range(1,cards_length+1):
+                                print(cards[-j])
                                 st=cards[-i].display()
                                 author.send(st)
                         elif cards_length == 0 :
@@ -83,12 +91,19 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
                     for user in hjson['forum'][key]:
-                        author = itchat.search_friends(nickName=user)[0]
+                        user = str(base64.b64decode(bytes(user, encoding='utf-8')),encoding = 'utf-8')
+                        try:
+                            author = itchat.search_friends(nickName=user)[0]
+                        except:
+                            print('Error when finding author in forum()')
+                            continue
                         for i in range(1,num+1):
                             print(cards[-i])
                             st=cards[-i].display()
                             author.send("新的消息:"+'\n'+st)
             Max_sequence[key] = last_sequence
+        with open('max_sequence_forum.txt', 'wb') as f:
+            pickle.dump(Max_sequence, f)
 def user(hjson,bbs,sequence_len,Max_sequence):
         user_length=len(hjson['user'])
         if user_length > sequence_len:
@@ -100,20 +115,29 @@ def user(hjson,bbs,sequence_len,Max_sequence):
             #print("233"+key)
             cards = bbs.get_user_content(user_name)
             cards_length = len(cards)
+            if cards_length == 0:
+                continue
             last_sequence = int(cards[-1].sequence)
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
                     for userId in hjson['user'][key]:
                         userId = str(base64.b64decode(bytes(userId,encoding='utf-8')),encoding = 'utf-8')
-                        author = itchat.search_friends(nickName=userId)[0]
+                        print('User:', userId)
+                        try:
+                            author = itchat.search_friends(nickName=user)[0]
+                        except:
+                            print('Error when finding author in user()')
+                            continue
+                        print('code length', cards_length)
                         if cards_length > 5:
                             for i in range(1,6):
                                 print(cards[-i])
                                 st=cards[-i].display()
                                 author.send(st)
                         elif cards_length>0 and cards_length<=5:
-                            for j in range(1,cards_length):
-                                st=cards[-i].display()
+                            for j in range(1,cards_length+1):
+                                print(cards[-j])
+                                st=cards[-j].display()
                                 author.send(st)
                         elif cards_length == 0 :
                                 author.send("Sorry, 您关注的板块无信息")                    
@@ -121,12 +145,19 @@ def user(hjson,bbs,sequence_len,Max_sequence):
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
                     for user in hjson['user'][key]:
-                        author = itchat.search_friends(nickName=user)[0]
+                        user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
+                        try:
+                            author = itchat.search_friends(nickName=user)[0]
+                        except:
+                            print('Error when finding author in forum()')
+                            continue
                         for i in range(1,num+1):
                             print(cards[-i])
                             st=cards[-i].display()
                             author.send("新的消息:"+'\n'+st)
             Max_sequence[key] = last_sequence
+        with open('max_sequence_user.txt', 'wb') as f:
+            pickle.dump(Max_sequence, f)
 def t1():
     itchat.run()
 def t2():
@@ -136,18 +167,25 @@ def t2():
     response_init = requests.get(url)
     print(response_init.text)
     hjson_init = json.loads(response_init.text)
-    Max_sequence_forum = {}
-    Max_sequence_user = {}
-    for key in hjson_init['forum']:
-        Max_sequence_forum[key]=-1
-    for key in hjson_init['user']:
-        Max_sequence_user[key]=-1
+    try:
+        with open('max_sequence_forum.txt', 'rb') as f:
+            Max_sequence_forum = pickle.load(f)
+        with open('max_sequence_user.txt',  'rb') as f:
+            Max_sequence_user = pickle.load(f)
+    except:
+        Max_sequence_forum = {}
+        Max_sequence_user = {}
+        for key in hjson_init['forum']:
+            Max_sequence_forum[key]=-1
+        for key in hjson_init['user']:
+            Max_sequence_user[key]=-1
     sequence_len_forum=len(Max_sequence_forum)
     sequence_len_user=len(Max_sequence_user)
     while True:
         bbs = bbsSpider.BBSSpider()
         #http = urllib3.PoolManager()
         response = requests.get(url)
+        print(response.text)
         hjson = json.loads(response.text) 
         forum(hjson,bbs,sequence_len_forum,Max_sequence_forum)
         user(hjson,bbs,sequence_len_user,Max_sequence_user)
@@ -155,7 +193,7 @@ def t2():
             
                         
                         
-itchat.auto_login(hotReload=True)
+itchat.auto_login(hotReload=True, enableCmdQR=2)
 threads = []
 th1 = threading.Thread(target=t1, args=())
 th1.start()

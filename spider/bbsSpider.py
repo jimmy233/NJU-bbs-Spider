@@ -134,6 +134,6 @@ if __name__ == '__main__':
     print('the last card: ', cards[-1])
     print(cards[-2])
     print('start to test user cards: wang 360')
-    cards = bbs.get_user_content('wang360')
+    cards = bbs.get_user_content('Lunit')
     print("len cards: ", len(cards))
     print('the last card: ', cards[-1])
