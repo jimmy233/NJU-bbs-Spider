@@ -11,10 +11,10 @@ import requests
 import bbsSpider
 import time  
 import threading 
-import urllib3
+#import urllib3
 import json
 import base64
-import requests
+#import requests
 from itchat.content import *
 
 KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
@@ -49,25 +49,7 @@ def simple_reply(msg):
        itchat.send_msg(tuling_reply(msg),toUserName=msg['FromUserName'])
     #itchat.send_msg('已经收到了文本消息，消息内容为%s'%msg['Text'],toUserName=msg['FromUserName'])
     #return "不想理你，并觉得你很傻逼"#"T reveived: %s" % msg["Text"]     #返回的给对方的消息，msg["Text"]表示消息的内容
-def t1():
-    itchat.run()
-def t2():
-    #author = itchat.search_friends(nickName='明月无晴')[0]
-    url='http://118.25.190.133:8080/getdict'
-    #http_init = urllib3.PoolManager()
-    response_init = requests.get(url)
-    print(response_init.text)
-    hjson_init = json.loads(response_init.text)
-    Max_sequence = {}
-    for key in hjson_init['forum']:
-        Max_sequence[key]=-1
-    sequence_len=len(Max_sequence)
-    while True:
-        bbs = bbsSpider.BBSSpider()
-        http = urllib3.PoolManager()
-        response = requests.get(url)
-        hjson = json.loads(response.text) 
-        print(hjson)
+def forum(hjson,bbs,sequence_len,Max_sequence):
         forum_length=len(hjson['forum'])
         if forum_length > sequence_len:
             for t in range(sequence_len,forum_length):
@@ -83,6 +65,7 @@ def t2():
                 if Max_sequence[key] == -1:
                     for user in hjson['forum'][key]:
                         user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
+                        print(itchat.search_friends(nickName=user))
                         author = itchat.search_friends(nickName=user)[0]
                         if cards_length > 5:
                             for i in range(1,6):
@@ -105,11 +88,73 @@ def t2():
                             st=cards[-i].display()
                             author.send("新的消息:"+'\n'+st)
             Max_sequence[key] = last_sequence
+def user(hjson,bbs,sequence_len,Max_sequence):
+        user_length=len(hjson['user'])
+        if user_length > sequence_len:
+            for t in range(sequence_len,user_length):
+                Max_sequence[hjson['user'][t]]=-1
+            sequence_len=user_length
+        for key in hjson['user']:
+            user_name=key
+            #print("233"+key)
+            cards = bbs.get_forum_content(user_name)
+            cards_length = len(cards)
+            last_sequence = int(cards[-1].sequence)
+            if last_sequence > Max_sequence[key]:
+                if Max_sequence[key] == -1:
+                    for userId in hjson['user'][key]:
+                        userId = str(base64.b64decode(bytes(userId,encoding='utf-8')),encoding = 'utf-8')
+                        author = itchat.search_friends(nickName=userId)[0]
+                        if cards_length > 5:
+                            for i in range(1,6):
+                                print(cards[-i])
+                                st=cards[-i].display()
+                                author.send(st)
+                        elif cards_length>0 and cards_length<=5:
+                            for j in range(1,cards_length):
+                                st=cards[-i].display()
+                                author.send(st)
+                        elif cards_length == 0 :
+                                author.send("Sorry, 您关注的板块无信息")                    
+                else:
+                    num= last_sequence - Max_sequence[key]
+                    #print("2333:"+num)
+                    for user in hjson['forum'][key]:
+                        author = itchat.search_friends(nickName=user)[0]
+                        for i in range(1,num+1):
+                            print(cards[-i])
+                            st=cards[-i].display()
+                            author.send("新的消息:"+'\n'+st)
+            Max_sequence[key] = last_sequence
+def t1():
+    itchat.run()
+def t2():
+    #author = itchat.search_friends(nickName='明月无晴')[0]
+    url='http://118.25.190.133:8080/getdict'
+    #http_init = urllib3.PoolManager()
+    response_init = requests.get(url)
+    print(response_init.text)
+    hjson_init = json.loads(response_init.text)
+    Max_sequence_forum = {}
+    Max_sequence_user = {}
+    for key in hjson_init['forum']:
+        Max_sequence_forum[key]=-1
+    for key in hjson_init['user']:
+        Max_sequence_user[key]=-1
+    sequence_len_forum=len(Max_sequence_forum)
+    sequence_len_user=len(Max_sequence_user)
+    while True:
+        bbs = bbsSpider.BBSSpider()
+        #http = urllib3.PoolManager()
+        response = requests.get(url)
+        hjson = json.loads(response.text) 
+        forum(hjson,bbs,sequence_len_forum,Max_sequence_forum)
+        user(hjson,bbs,sequence_len_user,Max_sequence_user)
         time.sleep(15)
             
                         
                         
-itchat.auto_login(hotReload=True, enableCmdQR=2)
+itchat.auto_login(hotReload=True,enableCmdQR=2)
 threads = []
 th1 = threading.Thread(target=t1, args=())
 th1.start()
