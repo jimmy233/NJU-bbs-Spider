@@ -65,6 +65,7 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
                 if Max_sequence[key] == -1:
                     for user in hjson['forum'][key]:
                         user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
+                        print("2333"+user)
                         print(itchat.search_friends(nickName=user))
                         author = itchat.search_friends(nickName=user)[0]
                         if cards_length > 5:
@@ -97,7 +98,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
         for key in hjson['user']:
             user_name=key
             #print("233"+key)
-            cards = bbs.get_forum_content(user_name)
+            cards = bbs.get_user_content(user_name)
             cards_length = len(cards)
             last_sequence = int(cards[-1].sequence)
             if last_sequence > Max_sequence[key]:
@@ -119,7 +120,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
                 else:
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
-                    for user in hjson['forum'][key]:
+                    for user in hjson['user'][key]:
                         author = itchat.search_friends(nickName=user)[0]
                         for i in range(1,num+1):
                             print(cards[-i])
@@ -154,7 +155,7 @@ def t2():
             
                         
                         
-itchat.auto_login(hotReload=True,enableCmdQR=2)
+itchat.auto_login(hotReload=True)
 threads = []
 th1 = threading.Thread(target=t1, args=())
 th1.start()
