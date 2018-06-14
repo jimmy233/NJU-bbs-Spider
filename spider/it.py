@@ -12,14 +12,15 @@ import bbsSpider
 import time  
 import threading 
 #import urllib3
+from urllib.parse import quote
+from urllib.parse import unquote
 import json
 import base64
 import pickle
 #import requests
 from itchat.content import *
 
-KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
-
+KEY = '53c96e78b57c451b8f8a29c9ff3daa48'
 def get_response(msg):
     apiUrl = 'http://www.tuling123.com/openapi/api'
     data = {
@@ -40,12 +41,13 @@ def tuling_reply(msg):
 @itchat.msg_register(itchat.content.TEXT)
 def simple_reply(msg):
     #这个是向发送者发送消息
+    print(msg['FromUserName'])
     msg_from = itchat.search_friends(userName=msg['FromUserName'])['NickName']
-    nick=base64.b64encode(bytes(msg_from,encoding='utf-8'))
+    nick=quote(msg_from)
     print(msg['Text'])
     st=msg['Text']
     if st=='我要关注':
-       itchat.send_msg('http://118.25.190.133:8080/test?id=%s'%str(nick,encoding='utf-8'),toUserName=msg['FromUserName'])
+       itchat.send_msg('http://118.25.190.133:8080/test?id=%s'%nick,toUserName=msg['FromUserName'])
     else:
        itchat.send_msg(tuling_reply(msg),toUserName=msg['FromUserName'])
     #itchat.send_msg('已经收到了文本消息，消息内容为%s'%msg['Text'],toUserName=msg['FromUserName'])
@@ -53,8 +55,9 @@ def simple_reply(msg):
 def forum(hjson,bbs,sequence_len,Max_sequence):
         forum_length=len(hjson['forum'])
         if forum_length > sequence_len:
-            for t in range(sequence_len,forum_length):
-                Max_sequence[hjson['forum'][t]]=-1
+            for key in hjson['forum']:
+                if key not in Max_sequence:
+                    Max_sequence[key] = -1
             sequence_len=forum_length
         for key in hjson['forum']:
             forum_name=key
@@ -67,7 +70,8 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
                     for user in hjson['forum'][key]:
-                        user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
+                        print('forum user', user)
+                        user = unquote(user)
                         print("2333"+user)
                         print(itchat.search_friends(nickName=user))
                         try:
@@ -91,7 +95,7 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
                     for user in hjson['forum'][key]:
-                        user = str(base64.b64decode(bytes(user, encoding='utf-8')),encoding = 'utf-8')
+                        user = unquote(user)
                         try:
                             author = itchat.search_friends(nickName=user)[0]
                         except:
@@ -107,8 +111,9 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
 def user(hjson,bbs,sequence_len,Max_sequence):
         user_length=len(hjson['user'])
         if user_length > sequence_len:
-            for t in range(sequence_len,user_length):
-                Max_sequence[hjson['user'][t]]=-1
+            for key in hjson['forum']:
+                if key not in Max_sequence:
+                    Max_sequence[key] = -1
             sequence_len=user_length
         for key in hjson['user']:
             user_name=key
@@ -121,7 +126,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
                     for userId in hjson['user'][key]:
-                        userId = str(base64.b64decode(bytes(userId,encoding='utf-8')),encoding = 'utf-8')
+                        userId = unquote(userId)
                         print('User:', userId)
                         try:
                             author = itchat.search_friends(nickName=user)[0]
@@ -145,7 +150,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
                     for user in hjson['user'][key]:
-                        user = str(base64.b64decode(bytes(user,encoding='utf-8')),encoding = 'utf-8')
+                        user = unquote(user)
                         try:
                             author = itchat.search_friends(nickName=user)[0]
                         except:
@@ -193,7 +198,7 @@ def t2():
             
                         
                         
-itchat.auto_login(hotReload=True, enableCmdQR=2)
+itchat.auto_login(hotReload=False, enableCmdQR=2)
 threads = []
 th1 = threading.Thread(target=t1, args=())
 th1.start()

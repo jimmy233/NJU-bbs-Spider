@@ -40,14 +40,17 @@ class BBSSpider:
         Returns:
             list<Card>
         """
-        forum_key = self.forum_dict[forum]
-        response = requests.get(self.boardURL, params={"board": forum_key})
-        with open("forum_info.html", "w") as f:
-            f.write(response.text)
-            print("succeed to grab content")
-        soup = BeautifulSoup(response.text, "lxml")
-        #取得数据的table
-        tableContent = soup.findAll('table')[3]
+        try:
+            forum_key = self.forum_dict[forum]
+            response = requests.get(self.boardURL, params={"board": forum_key})
+            with open("forum_info.html", "w") as f:
+                f.write(response.text)
+                print("succeed to grab content")
+            soup = BeautifulSoup(response.text, "lxml")
+            #取得数据的table
+            tableContent = soup.findAll('table')[3]
+        except:
+            return []
         #print(soup.findAll('table')[3])
         cards = self.__get_forum_cards(tableContent)
         return cards
@@ -69,7 +72,10 @@ class BBSSpider:
             print('succeed to grab content')
         soup = BeautifulSoup(response.text, "lxml")
         #取得数据的table
-        tableContent = soup.findAll('table')[3]
+        try:
+            tableContent = soup.findAll('table')[3]
+        except:
+            return []
         #print(tableContent)
         cards = self.__get_user_cards(userid, tableContent)
         return cards
