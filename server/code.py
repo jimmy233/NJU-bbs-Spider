@@ -10,10 +10,15 @@ urls = (
 	'/end','End'
 )
 render = web.template.render('test')
-All = {}
-All.setdefault('topic',dict())
-All.setdefault('user',dict())
-All.setdefault('forum',dict())
+try:
+	with open('info.json','rb') as f:
+		All = json.load(f) 
+	print(All)
+except:
+	All = {}
+	All.setdefault('topic',dict())
+	All.setdefault('user',dict())
+	All.setdefault('forum',dict())
 
 class test:
 	def GET(self):
@@ -27,8 +32,15 @@ class Set:
 		if name == "":
 			raise web.seeother('/test')
 			return
-		print(name)
-		All[i.choice].setdefault(i.key,list()).append(name)
+		if name in All[i.choice].setdefault(i.key,list()):
+			All[i.choice][i.key].remove(name)
+			if All[i.choice][i.key]==[]:
+				del All[i.choice][i.key]
+		else:
+			All[i.choice].setdefault(i.key,list()).append(name)
+		with open('info.json','w') as f:
+                        jsObj = json.dumps(All)
+			f.write(jsObj)
 		print(All)
 		raise web.seeother('/end')
 class Get:
