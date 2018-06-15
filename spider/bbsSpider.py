@@ -45,7 +45,7 @@ class BBSSpider:
             response = requests.get(self.boardURL, params={"board": forum_key})
             with open("forum_info.html", "w") as f:
                 f.write(response.text)
-                print("succeed to grab content")
+                print("succeed to grab content:", forum)
             soup = BeautifulSoup(response.text, "lxml")
             #取得数据的table
             tableContent = soup.findAll('table')[3]
@@ -69,7 +69,7 @@ class BBSSpider:
         response = requests.get(self.userURL, params={'userid': userid})
         with open('user_info.html', 'w') as f:
             f.write(response.text)
-            print('succeed to grab content')
+            print('succeed to grab content:', userid)
         soup = BeautifulSoup(response.text, "lxml")
         #取得数据的table
         try:

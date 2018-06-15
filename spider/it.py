@@ -112,7 +112,7 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
 def user(hjson,bbs,sequence_len,Max_sequence):
         user_length=len(hjson['user'])
         if user_length > sequence_len:
-            for key in hjson['forum']:
+            for key in hjson['user']:
                 if key not in Max_sequence:
                     Max_sequence[key] = -1
             sequence_len=user_length
@@ -123,6 +123,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
             cards_length = len(cards)
             if cards_length == 0:
                 continue
+#            print(cards[-1])
             last_sequence = int(cards[-1].sequence)
             if last_sequence > Max_sequence[key]:
                 if Max_sequence[key] == -1:
@@ -130,7 +131,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
                         userId = unquote(userId)
                         print('User:', userId)
                         try:
-                            author = itchat.search_friends(nickName=user)[0]
+                            author = itchat.search_friends(nickName=userId)[0]
                         except:
                             print('Error when finding author in user()')
                             continue
