@@ -9,8 +9,8 @@ Created on Fri May 25 14:26:53 2018
 import itchat
 import requests
 import bbsSpider
-import time  
-import threading 
+import time
+import threading
 #import urllib3
 from urllib.parse import quote
 from urllib.parse import unquote
@@ -90,12 +90,13 @@ def forum(hjson,bbs,sequence_len,Max_sequence):
                                 st=cards[-i].display()
                                 author.send(st)
                         elif cards_length == 0 :
-                                author.send("Sorry, 您关注的板块无信息")                    
+                                author.send("Sorry, 您关注的板块无信息")
                 else:
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
                     for user in hjson['forum'][key]:
                         user = unquote(user)
+                        print('forum user name: ', user)
                         try:
                             author = itchat.search_friends(nickName=user)[0]
                         except:
@@ -145,7 +146,7 @@ def user(hjson,bbs,sequence_len,Max_sequence):
                                 st=cards[-j].display()
                                 author.send(st)
                         elif cards_length == 0 :
-                                author.send("Sorry, 您关注的板块无信息")                    
+                                author.send("Sorry, 您关注的板块无信息")
                 else:
                     num= last_sequence - Max_sequence[key]
                     #print("2333:"+num)
@@ -191,13 +192,13 @@ def t2():
         #http = urllib3.PoolManager()
         response = requests.get(url)
         print(response.text)
-        hjson = json.loads(response.text) 
+        hjson = json.loads(response.text)
         forum(hjson,bbs,sequence_len_forum,Max_sequence_forum)
         user(hjson,bbs,sequence_len_user,Max_sequence_user)
         time.sleep(15)
-            
-                        
-                        
+
+
+
 itchat.auto_login(hotReload=False, enableCmdQR=2)
 threads = []
 th1 = threading.Thread(target=t1, args=())
@@ -206,6 +207,6 @@ threads.append(th1)
 th2 = threading.Thread(target=t2, args=())
 th2.start()
 threads.append(th2)
-for th in threads:  
+for th in threads:
     th.join()
 
